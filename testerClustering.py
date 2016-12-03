@@ -182,7 +182,7 @@ def addDictToItems(data, dic, name):
 
 def getMetrics(filename):
     data = getData("data.json")
-    namesOfFields = ["DBSCANJaccardDistance", "DBSCANHammingDistance", "DBSCANCosineDistance"]
+    namesOfFields = ["DBSCANEuclideanDistance"]
     for i in namesOfFields:
         if i == "DBSCANJaccardDistance":
             distance = jaccardDistance
@@ -210,7 +210,6 @@ def getMetrics(filename):
         totalD = 0
         totalComparisons = 0
         for j in xrange(1, len(seen)):
-            print "cluster length:", len(clusters[j]), j/len(seen)
             counter = 0
             for item in clusters[j]:
                 for item2 in clusters[j]:
@@ -218,7 +217,6 @@ def getMetrics(filename):
                         totalD += distance(item["fields"]["answer"], item2["fields"]["answer"])
                         totalComparisons += 1
                 counter += 1
-                print counter/len(seen)
         print "The average intracluster distance for ", i, " is ", totalD/totalComparisons
 
 

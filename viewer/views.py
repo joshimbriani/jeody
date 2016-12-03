@@ -23,10 +23,10 @@ def questionsIndex(request):
 def questionDetail(request, qid):
 	ques = Question.objects.get(id=qid)
 	#Stubbed for similar questions and trend questions
-	qcount = Question.objects.all().count()
+	qcount = Question.objects.filter(kclustercosine__exact = ques.kclustercosine).count()
 	rand1 = random.randint(0, qcount-5)
 	rand2 = random.randint(0, qcount-5)
-	sQs = Question.objects.all()[rand1:rand1+5]
+	sQs = Question.objects.filter(kclustercosine__exact = ques.kclustercosine)[rand1:rand1+5]
 	tQs = Question.objects.all()[rand2:rand2+5]
 	return render(request, 'questiondetail.html', {'question': ques, 'similarquestions': sQs, 'trendquestions': tQs})
 

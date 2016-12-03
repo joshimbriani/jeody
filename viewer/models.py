@@ -20,3 +20,6 @@ class Question(models.Model):
 	DBSCANCosineDistance = models.IntegerField(default=0)
 	DBSCANHammingDistance = models.IntegerField(default=0)
 	category = models.ForeignKey(QuestionCategory)
+	kclustercosine = models.IntegerField(default=0)
+	kclusterjaccard = models.IntegerField(default=0)
+	kclusterhamming = models.IntegerField(default=0)
