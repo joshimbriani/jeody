@@ -43,15 +43,34 @@ def getMostCommonWord(i, cluster):
 def prepare(request):
 	cluster = []
 	#qcount = Question.objects.all().count()
-	for i in range(67):
-		qs = Question.objects.filter(DBSCANJaccardDistance__exact = i)[:10]
-		temp = []
-		for j in qs:
-			temp.append(j)
-		cluster.append({'name': "Cluster: " + getMostCommonWord(i, temp), 'questions': temp})
-	#rand1 = random.randint(0, qcount-5)
-	#qs = Question.objects.all()[rand1:rand1+10]
-	#for i in range(10):
-	#	cluster.append({'name': str(i+1), 'questions': [qs[i]]})
-	#print cluster
-	return render(request, 'prepare.html', {'clusters': cluster})
+	method = request.GET.get('method', 'DBSCANJaccardDistance')
+	if method == "DBSCANJaccardDistance":
+		for i in range(67):
+			qs = Question.objects.filter(DBSCANJaccardDistance__exact = i)[:10]
+			temp = []
+			for j in qs:
+				temp.append(j)
+			cluster.append({'name': "Cluster: " + getMostCommonWord(i, temp), 'questions': temp})
+	elif method == "DBSCANEuclideanDistance":
+		for i in range(64):
+			qs = Question.objects.filter(DBSCANEuclideanDistance__exact = i)[:10]
+			temp = []
+			for j in qs:
+				temp.append(j)
+			cluster.append({'name': "Cluster: " + getMostCommonWord(i, temp), 'questions': temp})
+	elif method == "DBSCANCosineDistance":
+		for i in range(127):
+			qs = Question.objects.filter(DBSCANCosineDistance__exact = i)[:10]
+			temp = []
+			for j in qs:
+				temp.append(j)
+			cluster.append({'name': "Cluster: " + getMostCommonWord(i, temp), 'questions': temp})
+	elif method == "DBSCANHammingDistance":
+		for i in range(63):
+			qs = Question.objects.filter(DBSCANHammingDistance__exact = i)[:10]
+			temp = []
+			for j in qs:
+				temp.append(j)
+			cluster.append({'name': "Cluster: " + getMostCommonWord(i, temp), 'questions': temp})
+
+	return render(request, 'prepare.html', {'clusters': cluster, 'method': method})

@@ -3,7 +3,13 @@
 {% block title %}Prepare for Jeopardy{% endblock %}
 
 {% block main %}
-<h1>By the magic of clustering a data mining we've determined that questions in Jeopardy typically fall into {{clusters|length}} clusters. Below are 10 questions from each of the clusters so as to help you prepare.</h1>
+<h1>By the magic of clustering and data mining we've determined that questions in Jeopardy typically fall into {{clusters|length}} clusters. Below are 10 questions from each of the clusters so as to help you prepare.</h1>
+<select name="method" id="selectMethod" onchange="leaveChange()">
+    <option value="DBSCANJaccardDistance" {% if method == "DBSCANJaccardDistance" %}selected="selected"{% endif %}>Jaccard Distance</option>
+    <option value="DBSCANHammingDistance" {% if method == "DBSCANHammingDistance" %}selected="selected"{% endif %}>Hamming Distance</option>
+    <option value="DBSCANCosineDistance" {% if method == "DBSCANCosineDistance" %}selected="selected"{% endif %}>Cosine Distance</option>
+    <option value="DBSCANEuclideanDistance" {% if method == "DBSCANEuclideanDistance" %}selected="selected"{% endif %}>Euclidean Distance</option>
+</select>
 {% for cluster in clusters %}
 <h3>{{cluster.name}}</h3>
 <ul>
@@ -12,4 +18,9 @@
 {% endfor %}
 </ul>
 {% endfor %}
+<script type="text/javascript">
+    function leaveChange() {
+        window.location.replace("http://127.0.0.1:8000/prepare?method=" + document.getElementById("selectMethod").value);
+    }
+</script>
 {% endblock %}
