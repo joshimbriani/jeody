@@ -35,6 +35,8 @@ def categoryPKByStr(data, strRep):
 	for datum in data:
 		if strRep == datum["fields"]["category"]:
 			return datum["pk"]
+	
+	print 'No category match found: >' + strRep + '<'
 	return 1
 
 if len(sys.argv) < 3:
@@ -60,9 +62,9 @@ if sys.argv[2] == "questions":
 			#print row[6]
 			#print row[6].replace('\"', "")
 			#q = Question(text=row[5].replace('"', '\\"'), value=row[4].replace('\"', '"').replace('"', '\\"'), answer=row[6].replace('\\"', "").replace('\"', ""), theRound=row[2].replace('\"', '"').replace('"', '\\"'), showNumber=row[0].replace('\"', '"').replace('"', '\\"'), airDate=datetime.strptime(row[1], '%Y-%m-%d'), category=row[3].replace('\"', '"').replace('"', '\\"'))
-			q = Question(text=row[6].replace('"', '\\"').replace("\\'", "").replace("\'", ""), value=row[4].replace('\"', '"').replace('"', '\\"'), normalizedValue=row[5], answer=row[7].replace('\\"', "").replace('\"', "").replace("\\'", "").replace("\'", ""), theRound=row[2].replace('\"', '"').replace('"', '\\"'), showNumber=row[0].replace('\"', '"').replace('"', '\\"'), airDate=datetime.strptime(row[1], '%Y-%m-%d'), category=categoryPKByStr(data, row[3].replace('\"', '"').replace('"', '\\"')))
+			q = Question(text=row[6].replace('"', '\\"'), value=row[4].replace('\"', '"').replace('"', '\\"'), normalizedValue=row[5], answer=row[7].replace('\\"', "").replace('\"', ""), theRound=row[2].replace('\"', '"').replace('"', '\\"'), showNumber=row[0].replace('\"', '"').replace('"', '\\"'), airDate=datetime.strptime(row[1], '%Y-%m-%d'), category=categoryPKByStr(data, row[3]))
 			f.write(q.toJSON(i))
-			f.write(',')
+			f.write(',\n')			# newline makes it easier on text editors
 			i += 1
 elif sys.argv[2] == "category":
 	f = open('category.json', 'w')
@@ -71,18 +73,18 @@ elif sys.argv[2] == "category":
 		reader = csv.reader(csvfile)
 		c = Category(category="Unicode Error")
 		f.write(c.toJSON(0))
-		f.write(',')
+		f.write(',\n')
 		i = 1
 		s = set()
 		for row in reader:
 			if row[3].replace('\"', '"').replace('"', '\\"') not in s:
 				c = Category(category=row[3].replace('\"', '"').replace('"', '\\"'))
 				f.write(c.toJSON(i))
-				f.write(',')
+				f.write(',\n')
 				i += 1
 				s.add(row[3].replace('\"', '"').replace('"', '\\"'))
 
-f.seek(-1, os.SEEK_END)
+f.seek(-2, os.SEEK_END)
 f.truncate()
 
 f.write(']')

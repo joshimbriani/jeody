@@ -3,8 +3,10 @@
 {% block title %}Questions By Show{% endblock %}
 
 {% block main %}
-<h1>Click on any of the questions to see the full question details</h1>
+<h1>Questions</h1>
+<h3>We can't reasonably show you all {{count}} questions, so here is a random sample.</h3>
+<h3>Click on any of the questions to see the full question details.</h3>
 {% for question in questions %}
-<p><a href="/questions/{{question.id}}">{{question.text}}</a></p>
+<p>{{question.category.category}} for ${{question.normalizedValue}}:<br><a href="/questions/{{question.id}}">{{question.text}}</a></p>
 {% endfor %}
 {% endblock %}

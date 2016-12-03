@@ -3,13 +3,14 @@
 {% block title %}Question Detail{% endblock %}
 
 {% block main %}
-<h1>{{question.text}}</h1>
+<h1>{{question.category.category}}</h1>
+<h3>{{question.text}}</h3>
 <div id="spoiler" style="display:none"> 
 {{question.answer}}
 </div> 
 <button title="Click to show/hide answer" type="button" onclick="if(document.getElementById('spoiler') .style.display=='none') {document.getElementById('spoiler') .style.display=''}else{document.getElementById('spoiler') .style.display='none'}">Show/hide</button>
 
-<p>Originally aired on {{question.airDate}} (show number {{question.showNumber}}) in the category of {{question.category}} as part of {{question.theRound}} for a value of {{question.value}}. </p>
+<p>Originally aired on {{question.airDate}} (show number {{question.showNumber}}) as part of {{question.theRound}} for ${{question.value}}. </p>
 
 <h3>Similar Questions</h3>
 {% for ques in similarquestions %}

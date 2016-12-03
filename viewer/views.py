@@ -1,11 +1,12 @@
 import operator
 import random
+import string
 
 from django.http import HttpResponse
 from django.shortcuts import render
 from nltk.corpus import stopwords
 
-from models import Question
+from models import Question, QuestionCategory
 
 
 # Create your views here.
@@ -15,9 +16,9 @@ def index(request):
 
 def questionsIndex(request):
 	qcount = Question.objects.all().count()
-	rand = random.randint(0, qcount-11)
-	tquestions = Question.objects.all()[rand:rand+10]
-	return render(request, 'questions.html', {'questions': tquestions})
+	rand = random.randint(0, qcount-21)
+	tquestions = Question.objects.all()[rand:rand+20]
+	return render(request, 'questions.html', {'questions': tquestions, 'count': qcount})
 
 def questionDetail(request, qid):
 	ques = Question.objects.get(id=qid)
@@ -74,3 +75,39 @@ def prepare(request):
 			cluster.append({'name': "Cluster: " + getMostCommonWord(i, temp), 'questions': temp})
 
 	return render(request, 'prepare.html', {'clusters': cluster, 'method': method})
+
+def categoriesIndex(request):
+	cats = QuestionCategory.objects.all()
+	catCounts = []
+	for cat in cats:
+		catCounts.append(dict({'cat' : cat, 'count' : Question.objects.filter(category = cat.id).count()}))
+	#questions = Question.objects.all();
+	#indices = random.sample(range(len(questions)), 20)
+	#cats = [questions[i].category for i in indices]
+	#cats = [q.category for q in Question.objects.all().order_by('category').distinct('category')]
+	#rand = random.randint(0, cats.count()-11)
+	#tcategories = cats[rand:rand+10]
+	return render(request, 'categories.html', {'categories': catCounts})
+
+def categoryDetail(request, catId):
+	cat = QuestionCategory.objects.get(id=catId)
+	ques = Question.objects.filter(category=catId)
+	commonwords = trend(ques)
+	qcount = len(ques)
+	return render(request, 'categorydetail.html', {'cat': cat.category, 'questions': ques, 'words': commonwords})
+
+def trend(ques):
+	#stopwords = ['a', 'an', 'the', 'is', 'at', 'to']
+	#ques.sort(key = lambda q: q.airDate)
+	topics = []
+	wordtopics = [] # which topic is responsible for which word (estimated)
+	for q in ques:
+		# preprocessing: remove punctuation and stopwords
+		text = q.text.translate(string.punctuation)
+		words = [word for word in q.text.split() if word.lower not in stopwords.words("english")]
+		wordtopics += words
+		#words += q.answer.split()
+		#for (w in words):
+			# random initialization
+			
+	return wordtopics
