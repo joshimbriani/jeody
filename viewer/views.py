@@ -103,36 +103,94 @@ def trends(request):
 	
 	# Build list of show ids
 	shows = [q['showNumber'] for q in Question.objects.values("showNumber").annotate(n = Count("pk"))]
-	frequent = []
 	
-	trends = apriori(shows, frequent, 0.01)
+	trends = apriori(shows, 0.01)
+	
+	#import pdb; pdb.set_trace()
 
 	return render(request, 'trends.html', {'trends': trends})
 	
-def apriori(shows, frequent, threshold):
+# Apriori algorithm implementation
+def apriori(shows, threshold):
 	minSupport = int(len(shows)*threshold)
 	
 	counts = defaultdict(int)
-	frequent = []
+	frequent = {}	# dict of (sorted itemset tuple) -> frequency
 	
 	# count 1-itemsets
 	for id in shows:
 		for q in Question.objects.filter(showNumber = id):
-			cluster = q.kclustercosine							# can change this - looks good to me! That's our best value
+			cluster = q.kclustercosine
 			counts[cluster] += 1
-			
+	
 	# save frequent 1-itemsets
-	frequent = { k:v for k, v in counts.items() if v > minSupport}
+	frequent[1] = { (k,):v for k, v in counts.items() if v > minSupport }
 	
-	for k in range(2, 10):
-		candidates = genCandidates(frequent, k)
-		candidateCounts = {}
+	# increment k until no frequent itemsets are generated
+	for k in range(2, 100):
+		# generate candidate k-itemsets from the frequent (k-1)-itemsets
+		candidates = genCandidates(frequent[k-1].keys(), k)
+		candidateCounts = defaultdict(int)
 		
-		# test each candidate against the database
-		#for 
+		# test each candidate's support
+		for show in shows:
+			# collect all cluster ids from the show
+			showClusters = set([q['kclustercosine'] for q in Question.objects.filter(showNumber = show).values('kclustercosine').annotate(n = Count("pk"))])
+			
+			for candidate in candidates:
+				# test if show contains all cluster ids in the candidate
+				if showClusters.issuperset(candidate):
+					candidateCounts[candidate] += 1
+					
+		# prune unsupported candidates and add to the list of frequent sets
+		# itemsets are sorted before adding to simplify candidate generation on subsequent iterations
+		freq = {}
+		for k, v in candidateCounts.items():
+			if v > minSupport:
+				itemset = list(k)
+				itemset.sort()
+				freq[tuple(itemset)] = v
 		
+		if len(freq) == 0:
+			break
+		else:
+			frequent[k] = freq
+				
+		#frequent[k] = { k:v for k, v in candidateCounts.items() if v > minSupport }
 	
-	return counts
+	return frequent
 	
+# Uses the F(k-1) x F(k-1) method to generate a list of unordered candidate itemsets of the given size, given a list of sorted frequent itemsets of length size-1
 def genCandidates(frequent, size):
-	return
+	candidates = []
+	
+	# Generate potential itemsets by joining two nearly-equal itemsets
+	for i in range(len(frequent)):
+		first = frequent[i]
+		
+		for j in range(i+1, len(frequent)):
+			second = frequent[j]
+			
+			if len(first) != len(second):	# should not happen
+				import pdb; pdb.set_trace()
+				
+			# Both sets must be equal up to the final element
+			if nearlyEqual(first, second):
+				newCandidate = set(first)
+				newCandidate.add(second[-1])
+				candidates.append(newCandidate)
+			
+	return {}
+	
+# Tests two sorted lists of the same size to see if they are equal up to the final element, which must be different
+def nearlyEqual(first, second):
+	size = len(first)
+	
+	if size != len(second):	# should not happen
+		raise ValueError('Lists are of different lengths - cannot compare them')
+	
+	for k in range(size - 1):
+		if first[k] != second[k]:
+			return False
+	
+	return first[-1] != second[-1]
