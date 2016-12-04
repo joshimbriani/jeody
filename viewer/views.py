@@ -118,7 +118,7 @@ def apriori(shows, frequent, threshold):
 	# count 1-itemsets
 	for id in shows:
 		for q in Question.objects.filter(showNumber = id):
-			cluster = q.kclustercosine							# can change this
+			cluster = q.kclustercosine							# can change this - looks good to me! That's our best value
 			counts[cluster] += 1
 			
 	# save frequent 1-itemsets
@@ -132,7 +132,7 @@ def apriori(shows, frequent, threshold):
 		#for 
 		
 	
-	return counts;
+	return counts
 	
 def genCandidates(frequent, size):
 	return
