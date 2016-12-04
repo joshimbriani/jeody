@@ -1,9 +1,11 @@
 import operator
 import random
 import string
+from collections import defaultdict
 
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.db.models import Count
 from nltk.corpus import stopwords
 
 from models import Question, QuestionCategory
@@ -80,34 +82,57 @@ def categoriesIndex(request):
 	cats = QuestionCategory.objects.all()
 	catCounts = []
 	for cat in cats:
-		catCounts.append(dict({'cat' : cat, 'count' : Question.objects.filter(category = cat.id).count()}))
-	#questions = Question.objects.all();
-	#indices = random.sample(range(len(questions)), 20)
-	#cats = [questions[i].category for i in indices]
-	#cats = [q.category for q in Question.objects.all().order_by('category').distinct('category')]
-	#rand = random.randint(0, cats.count()-11)
-	#tcategories = cats[rand:rand+10]
+		count = Question.objects.filter(category = cat.id).count()
+		if count > 5:
+			catCounts.append(dict({'cat' : cat, 'count' : count}))
+			
+	catCounts.sort(key = lambda c: c['count'], reverse = True)
+	
 	return render(request, 'categories.html', {'categories': catCounts})
 
 def categoryDetail(request, catId):
 	cat = QuestionCategory.objects.get(id=catId)
-	ques = Question.objects.filter(category=catId)
-	commonwords = trend(ques)
+	ques = Question.objects.filter(category=catId).order_by('airDate')
 	qcount = len(ques)
-	return render(request, 'categorydetail.html', {'cat': cat.category, 'questions': ques, 'words': commonwords})
+	return render(request, 'categorydetail.html', {'cat': cat.category, 'questions': ques})
 
-def trend(ques):
-	#stopwords = ['a', 'an', 'the', 'is', 'at', 'to']
-	#ques.sort(key = lambda q: q.airDate)
-	topics = []
-	wordtopics = [] # which topic is responsible for which word (estimated)
-	for q in ques:
-		# preprocessing: remove punctuation and stopwords
-		text = q.text.translate(string.punctuation)
-		words = [word for word in q.text.split() if word.lower not in stopwords.words("english")]
-		wordtopics += words
-		#words += q.answer.split()
-		#for (w in words):
-			# random initialization
+# stub trends view
+def trends(request):
+	# Each show is a "basket" of items (questions)
+	# Find frequent itemsets across shows, treating questions in the same cluster as equal
+	
+	# Build list of show ids
+	shows = [q['showNumber'] for q in Question.objects.values("showNumber").annotate(n = Count("pk"))]
+	frequent = []
+	
+	trends = apriori(shows, frequent, 0.01)
+
+	return render(request, 'trends.html', {'trends': trends})
+	
+def apriori(shows, frequent, threshold):
+	minSupport = int(len(shows)*threshold)
+	
+	counts = defaultdict(int)
+	frequent = []
+	
+	# count 1-itemsets
+	for id in shows:
+		for q in Question.objects.filter(showNumber = id):
+			cluster = q.kclustercosine							# can change this
+			counts[cluster] += 1
 			
-	return wordtopics
+	# save frequent 1-itemsets
+	frequent = { k:v for k, v in counts.items() if v > minSupport}
+	
+	for k in range(2, 10):
+		candidates = genCandidates(frequent, k)
+		candidateCounts = {}
+		
+		# test each candidate against the database
+		#for 
+		
+	
+	return counts;
+	
+def genCandidates(frequent, size):
+	return
