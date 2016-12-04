@@ -6,6 +6,8 @@
 <h3>Click on any category to see a list of questions</h3>
 <p>{{categories|length}} total categories</p>
 {% for cat in categories %}
+{% if cat.cat.id > 0 %} 
 <p><a href="/categories/{{cat.cat.id}}">{{cat.count}}: {{cat.cat.category}}</a></p>
+{% endif %}
 {% endfor %}
 {% endblock %}

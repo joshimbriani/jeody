@@ -79,7 +79,7 @@ with open(sys.argv[1], 'rb') as csvfile:
 			i += 1
 			s.add(row[3].replace('\"', '"').replace('"', '\\"'))
 			
-f.seek(-2, os.SEEK_END)
+f.seek(-3, os.SEEK_END)
 f.truncate()
 
 f.write(']')
@@ -102,12 +102,19 @@ with open(sys.argv[1], 'rb') as csvfile:
 		#print row[6]
 		#print row[6].replace('\"', "")
 		#q = Question(text=row[5].replace('"', '\\"'), value=row[4].replace('\"', '"').replace('"', '\\"'), answer=row[6].replace('\\"', "").replace('\"', ""), theRound=row[2].replace('\"', '"').replace('"', '\\"'), showNumber=row[0].replace('\"', '"').replace('"', '\\"'), airDate=datetime.strptime(row[1], '%Y-%m-%d'), category=row[3].replace('\"', '"').replace('"', '\\"'))
-		q = Question(text=row[6].replace('"', '\\"'), value=row[4].replace('\"', '"').replace('"', '\\"'), normalizedValue=row[5], answer=row[7].replace('\\"', "").replace('\"', ""), theRound=row[2].replace('\"', '"').replace('"', '\\"'), showNumber=row[0].replace('\"', '"').replace('"', '\\"'), airDate=datetime.strptime(row[1], '%Y-%m-%d'), category=categoryPKByStr(categories, row[3].replace('\"', '\\"')))
+		q = Question(text=row[6].replace('"', '\\"').replace("\\'", "'"), \
+					value=row[4].replace('\"', '"').replace('"', '\\"'), \
+					normalizedValue=row[5], \
+					answer=row[7].replace('\\"', "").replace('\"', "").replace("\\'", "'"), \
+					theRound=row[2].replace('\"', '"').replace('"', '\\"'), \
+					showNumber=row[0].replace('\"', '"').replace('"', '\\"'), \
+					airDate=datetime.strptime(row[1], '%Y-%m-%d'), \
+					category=categoryPKByStr(categories, row[3].replace('\"', '\\"').replace("\\'", "'")))
 		f.write(q.toJSON(i))
 		f.write(',\n')			# newline makes it easier on text editors
 		i += 1
 
-f.seek(-2, os.SEEK_END)
+f.seek(-3, os.SEEK_END)
 f.truncate()
 
 f.write(']')
