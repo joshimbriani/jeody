@@ -105,10 +105,17 @@ def trends(request):
 	shows = [q['showNumber'] for q in Question.objects.values("showNumber").annotate(n = Count("pk"))]
 	
 	trends = apriori(shows, 0.1)
+
+	exampleQs = []
+
+	for key in trends:
+		qcount = Question.objects.filter(kclustercosine__exact = key).count()
+		rand1 = random.randint(0, qcount-5)
+		exampleQs.append(Question.objects.filter(kclustercosine__exact = key)[rand1])
 	
 	#import pdb; pdb.set_trace()
 
-	return render(request, 'trends.html', {'trends': trends})
+	return render(request, 'trends.html', {'trends': trends, 'exampleQuestion': exampleQs})
 	
 # Apriori algorithm implementation
 def apriori(shows, threshold):

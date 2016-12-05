@@ -1,10 +1,21 @@
 {% extends "index.html" %}
 
+{% load index %}
+{% load indexWOMO %}
+
 {% block title %}Prepare for Jeopardy{% endblock %}
 
 {% block main %}
-<h1>By the magic of clustering a data mining we've determined that questions in Jeopardy typically fall into {{clusters|length}} clusters. Below are 10 questions from each of the clusters so as to help you prepare.</h1>
+<h1>Trends</h1>
 {% for t in trends %}
-<p>{{t}}</p>
+{% with exampleQuestion|index:t as eQ %}
+
+<p>Cluster {{t}}, exemplified by questions such as: "<a href="/questions/{{eQ.pk}}">{{eQ.text}}</a>" tends to be seen with clusters:</p>
+{% endwith %}
+<ul>
+    {% for pair in trends|indexWOMO:t %}
+        <li>{{pair.0}}</li>
+    {% endfor %}
+</ul>
 {% endfor %}
 {% endblock %}
