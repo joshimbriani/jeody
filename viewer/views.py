@@ -104,7 +104,7 @@ def trends(request):
 	# Build list of show ids
 	shows = [q['showNumber'] for q in Question.objects.values("showNumber").annotate(n = Count("pk"))]
 	
-	trends = apriori(shows, 0.01)
+	trends = apriori(shows, 0.1)
 	
 	#import pdb; pdb.set_trace()
 
@@ -140,16 +140,16 @@ def apriori(shows, threshold):
 			for candidate in candidates:
 				# test if show contains all cluster ids in the candidate
 				if showClusters.issuperset(candidate):
-					candidateCounts[candidate] += 1
+					candidateCounts[tuple(candidate)] += 1
 					
 		# prune unsupported candidates and add to the list of frequent sets
 		# itemsets are sorted before adding to simplify candidate generation on subsequent iterations
 		freq = {}
-		for k, v in candidateCounts.items():
-			if v > minSupport:
-				itemset = list(k)
+		for key, val in candidateCounts.items():
+			if val > minSupport:
+				itemset = list(key)
 				itemset.sort()
-				freq[tuple(itemset)] = v
+				freq[tuple(itemset)] = val
 		
 		if len(freq) == 0:
 			break
@@ -180,7 +180,7 @@ def genCandidates(frequent, size):
 				newCandidate.add(second[-1])
 				candidates.append(newCandidate)
 			
-	return {}
+	return candidates
 	
 # Tests two sorted lists of the same size to see if they are equal up to the final element, which must be different
 def nearlyEqual(first, second):
