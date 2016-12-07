@@ -78,6 +78,7 @@ def prepare(request):
 
 	return render(request, 'prepare.html', {'clusters': cluster, 'method': method})
 
+# Categories view
 def categoriesIndex(request):
 	cats = QuestionCategory.objects.all()
 	catCounts = []
@@ -90,13 +91,14 @@ def categoriesIndex(request):
 	
 	return render(request, 'categories.html', {'categories': catCounts})
 
+# Single category detail
 def categoryDetail(request, catId):
 	cat = QuestionCategory.objects.get(id=catId)
 	ques = Question.objects.filter(category=catId).order_by('airDate')
 	qcount = len(ques)
 	return render(request, 'categorydetail.html', {'cat': cat.category, 'questions': ques})
 
-# stub trends view
+# Trends view
 def trends(request):
 	# Each show is a "basket" of items (questions)
 	# Find frequent itemsets across shows, treating questions in the same cluster as equal
@@ -108,16 +110,15 @@ def trends(request):
 
 	exampleQs = []
 
+	# take a random sample of questions from the trending clusters
 	for key in trends:
 		qcount = Question.objects.filter(kclustercosine__exact = key).count()
 		rand1 = random.randint(0, qcount-5)
 		exampleQs.append(Question.objects.filter(kclustercosine__exact = key)[rand1])
-	
-	#import pdb; pdb.set_trace()
 
 	return render(request, 'trends.html', {'trends': trends, 'exampleQuestion': exampleQs})
 	
-# Apriori algorithm implementation
+# Discovers frequent cluster ids appearing in (len(shows) * threshold) different shows.
 def apriori(shows, threshold):
 	minSupport = int(len(shows)*threshold)
 	
@@ -177,9 +178,6 @@ def genCandidates(frequent, size):
 		
 		for j in range(i+1, len(frequent)):
 			second = frequent[j]
-			
-			if len(first) != len(second):	# should not happen
-				import pdb; pdb.set_trace()
 				
 			# Both sets must be equal up to the final element
 			if nearlyEqual(first, second):
