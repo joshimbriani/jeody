@@ -129,7 +129,8 @@ def apriori(shows, threshold):
 	for id in shows:
 		for q in Question.objects.filter(showNumber = id):
 			cluster = q.kclustercosine
-			counts[cluster] += 1
+			if cluster >= 0:
+				counts[cluster] += 1
 	
 	# save frequent 1-itemsets
 	frequent[1] = { (k,):v for k, v in counts.items() if v > minSupport }
